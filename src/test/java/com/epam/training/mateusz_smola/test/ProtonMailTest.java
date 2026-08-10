@@ -32,17 +32,17 @@ public class ProtonMailTest {
     @Test
     void SavingDraft() throws InterruptedException {
         EmailMainPage mainPage = logging();
-        mainPage.saveDraft();
+        assertTrue(mainPage.saveDraft().checkForDraft(),"Draft was saved");
         Thread.sleep(5000);
     }
 
-//    @Test
-//    void openPage() {
-//        WebDriver driver = DriverManager.getDriver();
-//        LoginPage loginPage = new LoginPage(driver);
-//        loginPage.openPage().logIn(USERNAME, PASSWORD);
-//
-//    }
+    @Test
+    void openPage() {
+        WebDriver driver = DriverManager.getDriver();
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.openPage().logIn(USERNAME, PASSWORD);
+
+    }
 
     @AfterTest
     void teardown() {

@@ -5,8 +5,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+import java.util.List;
+
 public class EmailMainPage extends AbstractPage{
 
+    public static final String EMAIL = "you.are@beautiful.pl";
+    public static final String MAIL_SUBJECT = "Keep smiling";
+    public static final String MAIL_CONTENT = "Keep going \n" +
+            "Keep being cool";
     @FindBy ( css = "button[class=\"button button-large button-solid-norm w-full hidden md:inline\"]")
     WebElement newMailButton;
 
@@ -22,11 +28,11 @@ public class EmailMainPage extends AbstractPage{
     @FindBy (id = "rooster-editor")
     WebElement messageField;
 
-    @FindBy (css = "data-testid=\"navigation-link:all-drafts\"")
+    @FindBy (css = "a[data-testid=\"navigation-link:all-drafts\"]")
     WebElement draftPageLink;
 
-    @FindBy (id = "div[data-testid=\"message-item:Keep smiling\"")
-    WebElement draftedMessage;
+    @FindBy (css = "div[data-testid*=\"message-item\"]")
+    List<WebElement> draftedMessages;
 
     public EmailMainPage (WebDriver driver){
         super(driver);
@@ -35,12 +41,6 @@ public class EmailMainPage extends AbstractPage{
     public boolean foundNewMailButton(){
         waitForElement(newMailButton);
         return newMailButton.isDisplayed();
-    }
-
-    public EmailMainPage saveDraft(){
-        createNewDraft();
-        messageField.sendKeys(Keys.ESCAPE);
-        return this;
     }
 
     public EmailMainPage createNewDraft()
@@ -53,15 +53,60 @@ public class EmailMainPage extends AbstractPage{
 
     public EmailMainPage fillNewMailFields(){
         waitForElement(addresseeField);
-        addresseeField.sendKeys("you.are@beautiful.pl");
+        addresseeField.sendKeys(EMAIL);
         waitForElement(subjectField);
-        subjectField.sendKeys("Keep smiling");
+        subjectField.sendKeys(MAIL_SUBJECT);
         switchToIframe();
         waitForElement(messageField);
         messageField.clear();
-        messageField.sendKeys("Keep going \n" +
-                "Keep being cool");
+        messageField.sendKeys(MAIL_CONTENT);
         return this;
+    }
+
+    public EmailMainPage saveDraft(){
+        createNewDraft();
+        closeMessage();
+        return this;
+    }
+
+
+    public boolean checkForDraft() {
+        waitForElement(draftPageLink);
+        draftPageLink.click();
+
+        waitForElement(draftedMessages.get(0));
+        for (WebElement element : draftedMessages){
+            element.click();
+            if(checkForSearchedMessage())
+                return true;
+
+        }
+
+        return false;
+    }
+
+
+    private boolean checkForSearchedMessage(){
+        boolean isSearchedMessage = true;
+
+        waitForElement(addresseeField);
+        if (!addresseeField.getText().equals(EMAIL)) { isSearchedMessage = false; };
+        waitForElement(subjectField);
+        if (!subjectField.getText().equals(MAIL_SUBJECT)) { isSearchedMessage = false; }
+        switchToIframe();
+            waitForElement(messageField);
+            if (!messageField.getText().equals(MAIL_CONTENT)) { isSearchedMessage = false; }
+        switchToDefaultContent();
+        return isSearchedMessage;
+    }
+
+    private void closeMessage() {
+        messageField.sendKeys(Keys.ESCAPE);
+        driver.switchTo().defaultContent();
+    }
+
+    private void switchToDefaultContent(){
+        driver.switchTo().defaultContent();
     }
 
 
@@ -69,9 +114,4 @@ public class EmailMainPage extends AbstractPage{
         waitForElement(messageIframe);
         driver.switchTo().frame(messageIframe);
     }
-
-    private void switchToDefaultContent(){
-        driver.switchTo().defaultContent();
-    }
-
 }
