@@ -1,15 +1,16 @@
 package com.epam.training.mateusz_smola.page;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 public class EmailMainPage extends AbstractPage{
 
+    public static final String BY_FOR_EMAIL_LIST = "div[class=\"item-container-wrapper relative\"]";
     public static final String EMAIL = "you.are@beautiful.pl";
     public static final String MAIL_SUBJECT = "Keep smiling";
     public static final String MAIL_CONTENT = "Keep going \n" +
@@ -32,8 +33,13 @@ public class EmailMainPage extends AbstractPage{
     @FindBy (css = "a[data-testid=\"navigation-link:all-drafts\"]")
     WebElement draftPageLink;
 
-    @FindBy (css = "div[data-testid*=\"message-item\"]")
+    @FindBy (css = BY_FOR_EMAIL_LIST)
     List<WebElement> draftedMessages;
+
+    @FindBy ( css = "[data-testid=\"composer-addresses-item-label\"]")
+    WebElement messageAddress;
+
+
 
     public EmailMainPage (WebDriver driver){
         super(driver);
@@ -72,6 +78,7 @@ public class EmailMainPage extends AbstractPage{
 
 
     public boolean checkForDraft() {
+
         waitForElement(draftPageLink);
         draftPageLink.click();
         waitForMessageList();
@@ -79,12 +86,13 @@ public class EmailMainPage extends AbstractPage{
 
         for (int i = 0; i < listSize; i++){
 
-            List<WebElement> freshList =  driver.findElements(
-                    By.cssSelector("div[data-testid*=\"message-item\"]"));
-            freshList.get(i).click();
-
+            draftedMessages.get(i).click();
+            if (!isIFrameOpen(messageIframe)){
+                draftedMessages.get(i).click();
+            }
+            System.out.println("Kurwa!!!!");
             if(checkForSearchedMessage()) {
-                switchToDefaultContent();
+
                 return true;
             }
 
@@ -97,17 +105,29 @@ public class EmailMainPage extends AbstractPage{
     }
 
     private void waitForMessageList() {
+        //TODO If there is no messages it work to fast and ther is null pointer
         waitForElement(draftedMessages.getFirst());
     }
 
+    private boolean isIFrameOpen(WebElement IFrame){
+        try {
+            waitForElement(IFrame);
+            return true;
+        }
+        catch (TimeoutException e){
+            return false;
+        }
+    }
 
     private boolean checkForSearchedMessage(){
         boolean isSearchedMessage = true;
-
-        waitForElement(addresseeField);
-        if (!addresseeField.getText().equals(EMAIL)) { isSearchedMessage = false; };
+        System.out.println("Kurwa0");
+        waitForElement(messageAddress);
+        System.out.println("Kurwa1");
+        if (!messageAddress.getText().contains(EMAIL)) { isSearchedMessage = false; }
         waitForElement(subjectField);
-        if (!subjectField.getText().equals(MAIL_SUBJECT)) { isSearchedMessage = false; }
+        System.out.println("Kurwa2");
+        if (!subjectField.getAttribute("value").equals(MAIL_SUBJECT)) { isSearchedMessage = false; }
         switchToIframe();
             waitForElement(messageField);
             if (!messageField.getText().equals(MAIL_CONTENT)) { isSearchedMessage = false; }
