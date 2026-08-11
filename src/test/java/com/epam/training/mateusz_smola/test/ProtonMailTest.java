@@ -4,9 +4,7 @@ import com.epam.training.mateusz_smola.driver.DriverManager;
 import com.epam.training.mateusz_smola.page.EmailMainPage;
 import com.epam.training.mateusz_smola.page.LoginPage;
 import org.openqa.selenium.WebDriver;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import static org.testng.Assert.assertTrue;
 
@@ -16,7 +14,7 @@ public class ProtonMailTest {
     private static final String USERNAME = "selenium.test.epam";// @proton.me
     private static final String PASSWORD = "Selenium123!";
 
-    @BeforeTest
+    @BeforeMethod
     void setup() {
 
         DriverManager.setDriver();
@@ -44,7 +42,7 @@ public class ProtonMailTest {
 
     }
 
-    @AfterTest
+    @AfterMethod
     void teardown() {
         DriverManager.quitDriver();
     }
