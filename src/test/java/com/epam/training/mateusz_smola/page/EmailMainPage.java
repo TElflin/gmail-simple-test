@@ -1,5 +1,6 @@
 package com.epam.training.mateusz_smola.page;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -73,16 +74,30 @@ public class EmailMainPage extends AbstractPage{
     public boolean checkForDraft() {
         waitForElement(draftPageLink);
         draftPageLink.click();
+        waitForMessageList();
+        int listSize = draftedMessages.size();
 
-        waitForElement(draftedMessages.get(0));
-        for (WebElement element : draftedMessages){
-            element.click();
-            if(checkForSearchedMessage())
+        for (int i = 0; i < listSize; i++){
+
+            List<WebElement> freshList =  driver.findElements(
+                    By.cssSelector("div[data-testid*=\"message-item\"]"));
+            freshList.get(i).click();
+
+            if(checkForSearchedMessage()) {
+                switchToDefaultContent();
                 return true;
+            }
 
+            switchToDefaultContent();
+            draftPageLink.click();
+            waitForMessageList();
         }
 
         return false;
+    }
+
+    private void waitForMessageList() {
+        waitForElement(draftedMessages.getFirst());
     }
 
 
