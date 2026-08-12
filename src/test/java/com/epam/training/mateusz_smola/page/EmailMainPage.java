@@ -15,7 +15,7 @@ public class EmailMainPage extends AbstractPage{
     public static final String MAIL_SUBJECT = "Keep smiling";
     public static final String MAIL_CONTENT = "Keep going \n" +
             "Keep being cool";
-    @FindBy ( css = "button[class=\"button button-large button-solid-norm w-full hidden md:inline\"]")
+    @FindBy ( css = "button[data-testid=\"sidebar:compose\"][type=\"button\"]")
     WebElement newMailButton;
 
     @FindBy ( css = "[id^=\"to-composer\"]")
@@ -122,6 +122,7 @@ public class EmailMainPage extends AbstractPage{
     private boolean checkForSearchedMessage(){
         boolean isSearchedMessage = true;
         System.out.println("Kurwa0");
+        //TODO don't work, if i pause manually in debug mode and wait enough locator is found
         waitForElement(messageAddress);
         System.out.println("Kurwa1");
         if (!messageAddress.getText().contains(EMAIL)) { isSearchedMessage = false; }

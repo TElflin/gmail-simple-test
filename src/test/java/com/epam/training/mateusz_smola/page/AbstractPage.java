@@ -23,7 +23,7 @@ public class AbstractPage {
     }
 
     protected void waitForElement(WebElement element){
-        new WebDriverWait(driver, Duration.ofSeconds(15))
+        new WebDriverWait(driver, Duration.ofSeconds(3))
                 .until(ExpectedConditions.visibilityOf(element));
     }
 
