@@ -39,8 +39,9 @@ public class EmailMainPage extends AbstractPage{
     @FindBy ( css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
 
-    @FindBy ( css ="[data-testid=\"composer:close-button\"]")
+    @FindBy ( css ="\"[data-testid=\"composer:close-button\"]\"")
     WebElement messageCloseButton;
+
 
 
     public EmailMainPage (WebDriver driver){
@@ -88,14 +89,22 @@ public class EmailMainPage extends AbstractPage{
 
         for (int i = 0; i < listSize; i++){
 
+
             draftedMessages.get(i).click();
+/*            if (!isIFrameOpen(messageIframe)){
+                draftedMessages.get(i).click();
+            }*/
             if(checkForSearchedMessage()) {
+
                 return true;
             }
+
             switchToDefaultContent();
+            closeComposer();
             draftPageLink.click();
             waitForMessageList();
         }
+
         return false;
     }
 
@@ -114,29 +123,42 @@ public class EmailMainPage extends AbstractPage{
 
     private void closeMessage() {
         driver.switchTo().defaultContent();
-        WebElement closeButton = waitForClickable(messageCloseButton);
+        WebElement closeButton = getCloseButton();
         closeButton.click();
-        waitForClosing();
+
+
+    }
+
+    private void closeComposer() {
+        WebElement closeButton = getCloseButton();
+        closeButton.click();
+        new WebDriverWait(driver, Duration.ofSeconds(7))
+                .until(ExpectedConditions.invisibilityOfElementLocated(
+                        By.cssSelector("[data-testid^=\"composer-\"]")
+                ));
     }
 
     private void switchToDefaultContent(){
         driver.switchTo().defaultContent();
     }
 
+
     private void switchToIframe() {
         waitForElement(messageIframe);
         driver.switchTo().frame(messageIframe);
     }
 
-    private void waitForMessageList() {
-        new WebDriverWait(driver, Duration.ofSeconds(7))
+    private WebElement getCloseButton() {
+        return new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.elementToBeClickable(
-                        By.cssSelector(BY_FOR_EMAIL_LIST)
+                        By.cssSelector("[data-testid=\"composer:close-button\"]")
                 ));
     }
 
-    private void waitForClosing() {
-        new WebDriverWait(driver, Duration.ofSeconds(7))
-                .until(ExpectedConditions.invisibilityOf(messageIframe));
+    private void waitForMessageList() {
+        new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector(BY_FOR_EMAIL_LIST)
+                ));
     }
 }
