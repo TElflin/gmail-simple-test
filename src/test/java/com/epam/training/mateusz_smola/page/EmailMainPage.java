@@ -129,15 +129,6 @@ public class EmailMainPage extends AbstractPage{
 
     }
 
-    private void closeComposer() {
-        WebElement closeButton = getCloseButton();
-        closeButton.click();
-        new WebDriverWait(driver, Duration.ofSeconds(7))
-                .until(ExpectedConditions.invisibilityOfElementLocated(
-                        By.cssSelector("[data-testid^=\"composer-\"]")
-                ));
-    }
-
     private void switchToDefaultContent(){
         driver.switchTo().defaultContent();
     }
@@ -152,6 +143,15 @@ public class EmailMainPage extends AbstractPage{
         return new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.elementToBeClickable(
                         By.cssSelector("[data-testid=\"composer:close-button\"]")
+                ));
+    }
+
+    private void closeComposer() {
+        WebElement closeButton = getCloseButton();
+        closeButton.click();
+        new WebDriverWait(driver, Duration.ofSeconds(7))
+                .until(ExpectedConditions.invisibilityOfElementLocated(
+                        By.cssSelector("[data-testid^=\"composer-\"]")
                 ));
     }
 
