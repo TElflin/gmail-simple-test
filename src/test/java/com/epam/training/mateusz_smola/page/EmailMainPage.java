@@ -114,10 +114,7 @@ public class EmailMainPage extends AbstractPage{
 
     private void closeMessage() {
         driver.switchTo().defaultContent();
-        WebElement closeButton = getCloseButton();
-        closeButton.click();
-
-
+        close();
     }
 
     private void switchToDefaultContent(){
@@ -138,12 +135,16 @@ public class EmailMainPage extends AbstractPage{
     }
 
     private void closeComposer() {
-        WebElement closeButton = getCloseButton();
-        closeButton.click();
+        close();
         new WebDriverWait(driver, Duration.ofSeconds(7))
                 .until(ExpectedConditions.invisibilityOfElementLocated(
                         By.cssSelector("[data-testid^=\"composer-\"]")
                 ));
+    }
+
+    private void close() {
+        WebElement closeButton = getCloseButton();
+        closeButton.click();
     }
 
     private void waitForMessageList() {
