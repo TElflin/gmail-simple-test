@@ -1,6 +1,8 @@
 package com.epam.training.mateusz_smola.page;
 
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -38,10 +40,6 @@ public class EmailMainPage extends AbstractPage{
 
     @FindBy ( css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
-
-    @FindBy ( css ="\"[data-testid=\"composer:close-button\"]\"")
-    WebElement messageCloseButton;
-
 
 
     public EmailMainPage (WebDriver driver){
@@ -86,19 +84,12 @@ public class EmailMainPage extends AbstractPage{
         draftPageLink.click();
         waitForMessageList();
         int listSize = draftedMessages.size();
-
         for (int i = 0; i < listSize; i++){
-
-
             draftedMessages.get(i).click();
-/*            if (!isIFrameOpen(messageIframe)){
-                draftedMessages.get(i).click();
-            }*/
             if(checkForSearchedMessage()) {
 
                 return true;
             }
-
             switchToDefaultContent();
             closeComposer();
             draftPageLink.click();
