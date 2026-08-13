@@ -36,9 +36,11 @@ public class EmailMainPage extends AbstractPage{
     @FindBy (css = BY_FOR_EMAIL_LIST)
     List<WebElement> draftedMessages;
 
-    @FindBy ( css = "[data-testid=\"composer-addresses-item-label\"]")
+    @FindBy ( css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
 
+    @FindBy ( css ="[data-testid=\"composer:close-button\"]")
+    WebElement messageCloseButton;
 
 
     public EmailMainPage (WebDriver driver){
@@ -87,47 +89,21 @@ public class EmailMainPage extends AbstractPage{
         for (int i = 0; i < listSize; i++){
 
             draftedMessages.get(i).click();
-            if (!isIFrameOpen(messageIframe)){
-                draftedMessages.get(i).click();
-            }
-            System.out.println("Kurwa!!!!");
             if(checkForSearchedMessage()) {
-
                 return true;
             }
-
             switchToDefaultContent();
             draftPageLink.click();
             waitForMessageList();
         }
-
         return false;
-    }
-
-    private void waitForMessageList() {
-        //TODO If there is no messages it work to fast and ther is null pointer
-        waitForElement(draftedMessages.getFirst());
-    }
-
-    private boolean isIFrameOpen(WebElement IFrame){
-        try {
-            waitForElement(IFrame);
-            return true;
-        }
-        catch (TimeoutException e){
-            return false;
-        }
     }
 
     private boolean checkForSearchedMessage(){
         boolean isSearchedMessage = true;
-        System.out.println("Kurwa0");
-        //TODO don't work, if i pause manually in debug mode and wait enough locator is found
         waitForElement(messageAddress);
-        System.out.println("Kurwa1");
-        if (!messageAddress.getText().contains(EMAIL)) { isSearchedMessage = false; }
+        if (!messageAddress.getAttribute("title").contains(EMAIL)) { isSearchedMessage = false; }
         waitForElement(subjectField);
-        System.out.println("Kurwa2");
         if (!subjectField.getAttribute("value").equals(MAIL_SUBJECT)) { isSearchedMessage = false; }
         switchToIframe();
             waitForElement(messageField);
@@ -137,17 +113,30 @@ public class EmailMainPage extends AbstractPage{
     }
 
     private void closeMessage() {
-        messageField.sendKeys(Keys.ESCAPE);
         driver.switchTo().defaultContent();
+        WebElement closeButton = waitForClickable(messageCloseButton);
+        closeButton.click();
+        waitForClosing();
     }
 
     private void switchToDefaultContent(){
         driver.switchTo().defaultContent();
     }
 
-
     private void switchToIframe() {
         waitForElement(messageIframe);
         driver.switchTo().frame(messageIframe);
+    }
+
+    private void waitForMessageList() {
+        new WebDriverWait(driver, Duration.ofSeconds(7))
+                .until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector(BY_FOR_EMAIL_LIST)
+                ));
+    }
+
+    private void waitForClosing() {
+        new WebDriverWait(driver, Duration.ofSeconds(7))
+                .until(ExpectedConditions.invisibilityOf(messageIframe));
     }
 }

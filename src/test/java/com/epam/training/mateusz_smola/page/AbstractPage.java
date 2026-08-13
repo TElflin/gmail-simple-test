@@ -23,9 +23,14 @@ public class AbstractPage {
     }
 
     protected void waitForElement(WebElement element){
-        new WebDriverWait(driver, Duration.ofSeconds(3))
+        new WebDriverWait(driver, Duration.ofSeconds(7))
                 .until(ExpectedConditions.visibilityOf(element));
     }
+
+    protected WebElement waitForClickable(WebElement element){
+        return new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.elementToBeClickable(element));
+       }
 
 
 }
