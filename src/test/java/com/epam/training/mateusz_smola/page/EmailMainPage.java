@@ -1,8 +1,6 @@
 package com.epam.training.mateusz_smola.page;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -82,34 +80,67 @@ public class EmailMainPage extends AbstractPage{
 
         waitForElement(draftPageLink);
         draftPageLink.click();
+
         waitForMessageList();
         int listSize = draftedMessages.size();
-        for (int i = 0; i < listSize; i++){
-            draftedMessages.get(i).click();
-            if(checkForSearchedMessage()) {
 
+        for (int i = 0; i < listSize; i++){
+            clickDraftByIndex(i);
+            if(checkForSearchedMessage()) {
                 return true;
             }
             switchToDefaultContent();
             closeComposer();
+
             draftPageLink.click();
+
             waitForMessageList();
         }
-
         return false;
     }
 
+    private void clickDraftByIndex(int index) {
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> {
+                    try {
+                        List<WebElement> list = d.findElements(By.cssSelector(BY_FOR_EMAIL_LIST));
+                        list.get(index).click();
+                        return true;
+                    } catch (StaleElementReferenceException e) {
+                        return false;
+                    }
+                });
+    }
     private boolean checkForSearchedMessage(){
-        boolean isSearchedMessage = true;
-        waitForElement(messageAddress);
-        if (!messageAddress.getAttribute("title").contains(EMAIL)) { isSearchedMessage = false; }
-        waitForElement(subjectField);
-        if (!subjectField.getAttribute("value").equals(MAIL_SUBJECT)) { isSearchedMessage = false; }
-        switchToIframe();
-            waitForElement(messageField);
-            if (!messageField.getText().equals(MAIL_CONTENT)) { isSearchedMessage = false; }
-        switchToDefaultContent();
-        return isSearchedMessage;
+        try {
+            waitForComposerToFullyLoad();
+            if (!messageAddress.getAttribute("title").contains(EMAIL)) { return false; }
+            if (!subjectField.getAttribute("value").equals(MAIL_SUBJECT)) { return false; }
+
+            switchToIframe();
+            if (!messageField.getText().equals(MAIL_CONTENT)) {
+                switchToDefaultContent();
+                return false;
+            }
+            switchToDefaultContent();
+            return true;
+
+        } catch (TimeoutException | NoSuchElementException e) {
+            switchToDefaultContent();
+            return false;
+        }
+    }
+
+    private void waitForComposerToFullyLoad() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("[data-testid^=\"composer-\"]")
+        ));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("[data-testid=\"composer:address\"]")
+        ));
     }
 
     private void closeMessage() {
