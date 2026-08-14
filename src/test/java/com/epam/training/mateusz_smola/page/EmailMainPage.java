@@ -114,10 +114,15 @@ public class EmailMainPage extends AbstractPage{
     private boolean checkForSearchedMessage(){
         try {
             waitForComposerToFullyLoad();
+
+            waitForElement(messageAddress);
             if (!messageAddress.getAttribute("title").contains(EMAIL)) { return false; }
+
+            waitForElement(subjectField);
             if (!subjectField.getAttribute("value").equals(MAIL_SUBJECT)) { return false; }
 
             switchToIframe();
+            waitForElement(messageField);
             if (!messageField.getText().equals(MAIL_CONTENT)) {
                 switchToDefaultContent();
                 return false;
