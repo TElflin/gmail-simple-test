@@ -135,12 +135,9 @@ public class EmailMainPage extends AbstractPage{
         int listSize = draftedMessages.size();
 
         for (int i = 0; i < listSize; i++) {
-            if (checkSentHeader()) {
+            if (checkSentHeader(i)) {
                 return i;
             }
-
-            sendPageLink.click();
-            waitForMessageList();
         }
         return -1;
     }
@@ -182,23 +179,33 @@ public class EmailMainPage extends AbstractPage{
         }
     }
 
-    private boolean checkSentHeader() {
-
+    private boolean checkSentHeader(int index) {
         try {
-            WebElement emailAddress = driver.findElement(By.cssSelector("[data-testid=\"message-column:sender-address\"]"));
-            waitForElement(emailAddress);
-            if (!emailAddress.getAttribute("title").contains(EMAIL)) { return false; }
+            String senderTitle = getTitleFromRow(index, "[data-testid=\"message-column:sender-address\"]");
+            System.out.println("Row " + index + " sender=[" + senderTitle + "]");
+            if (!senderTitle.contains(EMAIL)) { return false; }
 
-            WebElement sentTitle = driver.findElement(By.cssSelector("[data-testid=\"message-row:subject\"]"));
-            waitForElement(sentTitle);
-            if (!sentTitle.getAttribute("title").equals(MAIL_SUBJECT)) { return false; }
+            String subjectTitle = getTitleFromRow(index, "[data-testid=\"message-row:subject\"]");
+            System.out.println("Row " + index + " subject=[" + subjectTitle + "]");
+            return subjectTitle.equals(MAIL_SUBJECT);
 
-            return true;
-
-        } catch (TimeoutException | NoSuchElementException e) {
+        } catch (TimeoutException | NoSuchElementException | IndexOutOfBoundsException e) {
             return false;
         }
     }
+
+    private String getTitleFromRow(int index, String innerSelector) {
+        return new WebDriverWait(driver, Duration.ofSeconds(10))
+                .ignoring(StaleElementReferenceException.class)
+                .until(d -> {
+                    List<WebElement> rows = d.findElements(By.cssSelector(BY_FOR_EMAIL_LIST));
+                    WebElement row = rows.get(index);
+                    WebElement el = row.findElement(By.cssSelector(innerSelector));
+                    String title = el.getAttribute("title");
+                    return (title != null && !title.isEmpty()) ? title : null;
+                });
+    }
+
     public EmailMainPage sendMail(){
         clickSendButton();
         switchToDefaultContent();
