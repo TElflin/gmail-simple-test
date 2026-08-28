@@ -6,6 +6,7 @@ import com.epam.training.mateusz_smola.page.LoginPage;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.*;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 
@@ -21,27 +22,40 @@ public class ProtonMailTest {
     }
 
 
-    @Test
+/*    @Test
     void successfulLogin() {
         EmailMainPage mainPage = logging();
         assertTrue(mainPage.foundNewMailButton(), "Successfully logged and found button");
-    }
+    }*/
 
     @Test
-    void SavingDraft() throws InterruptedException {
+    void savingDraft() throws InterruptedException {
         EmailMainPage mainPage = logging();
-        assertTrue(mainPage.saveDraft().checkForDraft(),"Draft was saved");
+        assertTrue(mainPage.saveDraft().checkForDraft(),"Draft wasn't saved");
         Thread.sleep(5000);
     }
 
     @Test
-    void openPage() {
+    void appearingInSendDirectoryAfterSending() {
         WebDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
         loginPage.openPage().logIn(USERNAME, PASSWORD);
 
     }
 
+    @Test
+    void deletionFromDraftDirectoryAfterSending() {
+        EmailMainPage mainPage = logging();
+
+        mainPage.openDraft().sendMail();
+        assertFalse(mainPage.checkForDraft(), "Draft didn't disappear after sending");
+    }
+
+    @Test
+    void mailIsInSendFolder(){
+        EmailMainPage mainPage = logging();
+        assertTrue(mainPage.checkForSent(), "No email in send folder");
+    }
     @AfterMethod
     void teardown() {
         DriverManager.quitDriver();

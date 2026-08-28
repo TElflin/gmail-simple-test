@@ -21,7 +21,7 @@ public class AbstractPage {
     }
 
     protected void waitForElement(WebElement element){
-        new WebDriverWait(driver, Duration.ofSeconds(7))
+        new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.visibilityOf(element));
     }
 

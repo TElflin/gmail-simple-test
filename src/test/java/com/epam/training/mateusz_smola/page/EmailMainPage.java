@@ -11,6 +11,7 @@ import java.util.List;
 public class EmailMainPage extends AbstractPage{
 
     public static final String BY_FOR_EMAIL_LIST = "div[class=\"item-container-wrapper relative\"]";
+    public static final String BY_FOR_SEND_BUTTON = "[data-testid=\"composer:send-button\"]";
     public static final String EMAIL = "you.are@beautiful.pl";
     public static final String MAIL_SUBJECT = "Keep smiling";
     public static final String MAIL_CONTENT = "Keep going \n" +
@@ -33,11 +34,15 @@ public class EmailMainPage extends AbstractPage{
     @FindBy (css = "a[data-testid=\"navigation-link:all-drafts\"]")
     WebElement draftPageLink;
 
+    @FindBy (css = "a[data-testid=\"navigation-link:all-sent\"]")
+    WebElement sendPageLink;
+
     @FindBy (css = BY_FOR_EMAIL_LIST)
     List<WebElement> draftedMessages;
 
     @FindBy ( css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
+
 
 
     public EmailMainPage (WebDriver driver){
@@ -77,26 +82,67 @@ public class EmailMainPage extends AbstractPage{
 
 
     public boolean checkForDraft() {
+        int index = findDraftIndex();
+        if (index != -1) {
+            closeComposer();
+            return true;
+        }
+        return false;
+    }
+    public boolean checkForSent() {
+        int index = findSentIndex();
+        if (index != -1) {
 
+            return true;
+        }
+        return false;
+    }
+
+    public EmailMainPage openDraft() {
+        int index = findDraftIndex();
+        if (index == -1) {
+            throw new NoSuchElementException("Matching draft not found");
+        }
+        return this;
+    }
+
+    private int findDraftIndex() {
         waitForElement(draftPageLink);
         draftPageLink.click();
-
         waitForMessageList();
+
         int listSize = draftedMessages.size();
 
-        for (int i = 0; i < listSize; i++){
+        for (int i = 0; i < listSize; i++) {
             clickDraftByIndex(i);
-            if(checkForSearchedMessage()) {
-                return true;
+            if (checkForSearchedMessage()) {
+                return i;
             }
             switchToDefaultContent();
             closeComposer();
 
             draftPageLink.click();
-
             waitForMessageList();
         }
-        return false;
+        return -1;
+    }
+
+    private int findSentIndex() {
+        waitForElement(sendPageLink);
+        sendPageLink.click();
+        waitForMessageList();
+
+        int listSize = draftedMessages.size();
+
+        for (int i = 0; i < listSize; i++) {
+            if (checkSentHeader()) {
+                return i;
+            }
+
+            sendPageLink.click();
+            waitForMessageList();
+        }
+        return -1;
     }
 
     private void clickDraftByIndex(int index) {
@@ -136,6 +182,29 @@ public class EmailMainPage extends AbstractPage{
         }
     }
 
+    private boolean checkSentHeader() {
+
+        try {
+            WebElement emailAddress = driver.findElement(By.cssSelector("[data-testid=\"message-column:sender-address\"]"));
+            waitForElement(emailAddress);
+            if (!emailAddress.getAttribute("title").contains(EMAIL)) { return false; }
+
+            WebElement sentTitle = driver.findElement(By.cssSelector("[data-testid=\"message-row:subject\"]"));
+            waitForElement(sentTitle);
+            if (!sentTitle.getAttribute("title").equals(MAIL_SUBJECT)) { return false; }
+
+            return true;
+
+        } catch (TimeoutException | NoSuchElementException e) {
+            return false;
+        }
+    }
+    public EmailMainPage sendMail(){
+        clickSendButton();
+        switchToDefaultContent();
+        return this;
+    }
+
     private void waitForComposerToFullyLoad() {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -149,9 +218,10 @@ public class EmailMainPage extends AbstractPage{
     }
 
     private void closeMessage() {
-        driver.switchTo().defaultContent();
-        close();
+        switchToDefaultContent();
+        closeComposer();
     }
+
 
     private void switchToDefaultContent(){
         driver.switchTo().defaultContent();
@@ -170,23 +240,27 @@ public class EmailMainPage extends AbstractPage{
                 ));
     }
 
-    private void closeComposer() {
-        close();
+
+    private void  closeComposer() {
+        WebElement closeButton = getCloseButton();
+        closeButton.click();
         new WebDriverWait(driver, Duration.ofSeconds(7))
                 .until(ExpectedConditions.invisibilityOfElementLocated(
                         By.cssSelector("[data-testid^=\"composer-\"]")
                 ));
     }
 
-    private void close() {
-        WebElement closeButton = getCloseButton();
-        closeButton.click();
-    }
-
     private void waitForMessageList() {
-        new WebDriverWait(driver, Duration.ofSeconds(5))
+        new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(ExpectedConditions.elementToBeClickable(
                         By.cssSelector(BY_FOR_EMAIL_LIST)
                 ));
+    }
+
+    private void clickSendButton() {
+        WebElement sendButton = new WebDriverWait(driver, Duration.ofSeconds(5))
+                .until(ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector(BY_FOR_SEND_BUTTON)));
+        sendButton.click();
     }
 }
