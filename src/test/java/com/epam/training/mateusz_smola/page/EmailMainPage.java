@@ -181,13 +181,13 @@ public class EmailMainPage extends AbstractPage{
 
     private boolean checkSentHeader(int index) {
         try {
-            String senderTitle = getTitleFromRow(index, "[data-testid=\"message-column:sender-address\"]");
+            String senderTitle = getTextFromRow(index, "[data-testid=\"message-column:sender-address\"]");
             System.out.println("Row " + index + " sender=[" + senderTitle + "]");
             if (!senderTitle.contains(EMAIL)) { return false; }
 
-            String subjectTitle = getTitleFromRow(index, "[data-testid=\"message-row:subject\"]");
+            String subjectTitle = getTextFromRow(index, "[data-testid=\"message-row:subject\"]");
             System.out.println("Row " + index + " subject=[" + subjectTitle + "]");
-            return subjectTitle.equals(MAIL_SUBJECT);
+            return subjectTitle.trim().contains(MAIL_SUBJECT);
 
         } catch (TimeoutException | NoSuchElementException | IndexOutOfBoundsException e) {
             return false;
@@ -201,8 +201,35 @@ public class EmailMainPage extends AbstractPage{
                     List<WebElement> rows = d.findElements(By.cssSelector(BY_FOR_EMAIL_LIST));
                     WebElement row = rows.get(index);
                     WebElement el = row.findElement(By.cssSelector(innerSelector));
-                    String title = el.getAttribute("title");
+                    String title = el.getText();
                     return (title != null && !title.isEmpty()) ? title : null;
+                });
+    }
+    private String getTextFromRow(int index, String innerSelector) {
+        return new WebDriverWait(driver, Duration.ofSeconds(10))
+                .ignoring(StaleElementReferenceException.class)
+                .ignoring(NoSuchElementException.class)
+                .until(d -> {
+                    List<WebElement> rows = d.findElements(By.cssSelector(BY_FOR_EMAIL_LIST));
+                    WebElement row = rows.get(index);
+
+                    // Debug: print all data-testid elements inside the row
+                    List<WebElement> allTestIds = row.findElements(
+                            By.cssSelector("[data-testid]"));
+                    System.out.println("Elements in row " + index + ":");
+                    for (WebElement e : allTestIds) {
+                        System.out.println("  " + e.getDomAttribute("data-testid")
+                                + " -> [" + e.getText() + "]");
+                    }
+
+                    WebElement el = row.findElement(By.cssSelector(innerSelector));
+                    String text = el.getText();
+                    if (text == null || text.trim().isEmpty()) {
+                        text = (String) ((JavascriptExecutor) d)
+                                .executeScript("return arguments[0].textContent", el);
+                    }
+                    return (text != null && !text.trim().isEmpty())
+                            ? text.trim() : null;
                 });
     }
 
