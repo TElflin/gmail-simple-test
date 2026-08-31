@@ -22,38 +22,31 @@ public class ProtonMailTest {
     }
 
 
-/*    @Test
+    @Test
     void successfulLogin() {
         EmailMainPage mainPage = logging();
         assertTrue(mainPage.foundNewMailButton(), "Successfully logged and found button");
-    }*/
+    }
 
-    @Test
-    void savingDraft() throws InterruptedException {
+    @Test//(dependsOnMethods = "successfulLogin")
+    void creatingAndSavingDraft() {
         EmailMainPage mainPage = logging();
         assertTrue(mainPage.saveDraft().checkForDraft(),"Draft wasn't saved");
-        Thread.sleep(5000);
-    }
-
-    @Test
-    void appearingInSendDirectoryAfterSending() {
-        WebDriver driver = DriverManager.getDriver();
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage.openPage().logIn(USERNAME, PASSWORD);
 
     }
 
-    @Test
-    void deletionFromDraftDirectoryAfterSending() {
+    @Test//(dependsOnMethods = "creatingAndSavingDraft")
+    void sendingMailDeletingFromDrafts() {
         EmailMainPage mainPage = logging();
 
         mainPage.openDraft().sendMail();
         assertFalse(mainPage.checkForDraft(), "Draft didn't disappear after sending");
     }
 
-    @Test
+    @Test//(dependsOnMethods = "sendingMailDeletingFromDrafts")
     void mailIsInSendFolder(){
         EmailMainPage mainPage = logging();
+
         assertTrue(mainPage.checkForSent(), "No email in send folder");
     }
     @AfterMethod
