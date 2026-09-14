@@ -6,8 +6,8 @@
             <class name="com.epam.training.mateusz_smola.test.ProtonMailTest">
                 <methods>
                     <include name="savingDraft"/>
-                    <include name="appearingInSendDirectoryAfterSending"/>
-                    <include name="deletionFromDraftDirectoryAfterSending"/>
+                    <include name="creatingAndSavingDraft"/>
+                    <include name="sendingMailDeletingFromDrafts"/>
                     <include name="mailIsInSendFolder"/>
                 </methods>
             </class>
