@@ -1,12 +1,13 @@
 package com.epam.training.mateusz_smola.page;
 
+import com.epam.training.mateusz_smola.model.Email;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import com.epam.training.mateusz_smola.model.User;
 
 public class LoginPage extends AbstractPage {
 
-    private static final String PAGE_URL = "https://account.proton.me/pl/mail";
 
     @FindBy (css = "#username")
     private WebElement usernameField;
@@ -21,13 +22,13 @@ public class LoginPage extends AbstractPage {
         super(driver);
     }
 
-    public LoginPage openPage (){
-        openPage(PAGE_URL);
+    public LoginPage openPage (Email email){
+        openPage(email.getPageUrl());
         return this;
     }
 
-    public EmailMainPage logIn(String username, String password){
-        enterCredentials(username,password);
+    public EmailMainPage logIn(User user){
+        enterCredentials(user.getUsername(),user.getPassword());
         submitButton.click();
         return new EmailMainPage(driver);
     }

@@ -16,8 +16,8 @@ public class AbstractPage {
         PageFactory.initElements(driver,this);
         this.driver = driver;
     }
-    protected void openPage(String url){
-        driver.get(url);
+    protected void openPage(String pageUrl){
+        driver.get(pageUrl);
     }
 
     protected void waitForElement(WebElement element){

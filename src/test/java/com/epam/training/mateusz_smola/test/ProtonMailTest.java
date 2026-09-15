@@ -1,24 +1,24 @@
 package com.epam.training.mateusz_smola.test;
 
 import com.epam.training.mateusz_smola.driver.DriverManager;
+import com.epam.training.mateusz_smola.model.Email;
 import com.epam.training.mateusz_smola.page.EmailMainPage;
 import com.epam.training.mateusz_smola.page.LoginPage;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.*;
 
+import static com.epam.training.mateusz_smola.service.EmailCreator.createEmail;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 
 public class ProtonMailTest {
 
-    private static final String USERNAME = "selenium.test.epam";// @proton.me
-    private static final String PASSWORD = "Selenium123!";
 
     @BeforeMethod
     void setup() {
-
         DriverManager.setDriver();
+
     }
 
 
@@ -55,8 +55,9 @@ public class ProtonMailTest {
     }
 
     private EmailMainPage logging(){
+        Email email = createEmail();
         WebDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
-        return loginPage.openPage().logIn(USERNAME, PASSWORD);
+        return loginPage.openPage(email).logIn(email.getUser());
     }
 }
