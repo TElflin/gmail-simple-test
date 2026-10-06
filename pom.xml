@@ -16,6 +16,7 @@
         <maven.compiler.target>24</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <selenium.version>4.46.0</selenium.version>
+        <suite>smoke.test.xml</suite>
     </properties>
 
     <dependencyManagement>
@@ -65,7 +66,7 @@
             <version>3.5.6</version>
                 <configuration>
                     <suiteXmlFiles>
-                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                        <suiteXmlFile>src/test/resources/${suite}</suiteXmlFile>
                     </suiteXmlFiles>
                 </configuration>
             </plugin>

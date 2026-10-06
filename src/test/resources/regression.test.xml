@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="regression">
+    <test name="ProtonMail Tests">
+        <classes>
+            <class name="com.epam.training.mateusz_smola.test.ProtonMailTest">
+                <methods>
+                    <include name="successfulLogin"/>
+                    <include name="creatingAndSavingDraft"/>
+                    <include name="sendingMailDeletingFromDrafts"/>
+                    <include name="mailIsInSendFolder"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+</suite>
