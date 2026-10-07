@@ -1,5 +1,6 @@
 package com.epam.training.mateusz_smola.driver;
 
+import com.epam.training.mateusz_smola.util.TestListener;
 import org.openqa.selenium.InvalidArgumentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -8,6 +9,7 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.testng.annotations.Listeners;
 
 
 public class DriverManager {
@@ -20,6 +22,11 @@ public class DriverManager {
     }
 
     public static void setDriver() {
+
+        if (driver.get() != null) {
+            quitDriver();
+        }
+
         String browser = System.getProperty("browser");
         switch (browser){
 
@@ -39,7 +46,7 @@ public class DriverManager {
             }
 
             case null, default -> {
-                throw new InvalidArgumentException("No compatible browser specified : -Dbrowser=yourbrowser");
+                throw new IllegalArgumentException("No compatible browser specified : -Dbrowser=yourbrowser");
             }
         }
     }
