@@ -4,11 +4,15 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.List;
 
-public class EmailMainPage extends AbstractPage{
+public class EmailMainPage extends AbstractPage {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailMainPage.class);
 
     public static final String BY_FOR_EMAIL_LIST = "div[class=\"item-container-wrapper relative\"]";
     public static final String BY_FOR_SEND_BUTTON = "[data-testid=\"composer:send-button\"]";
@@ -16,113 +20,139 @@ public class EmailMainPage extends AbstractPage{
     public static final String MAIL_SUBJECT = "Keep smiling";
     public static final String MAIL_CONTENT = "Keep going \n" +
             "Keep being cool";
-    @FindBy ( css = "button[data-testid=\"sidebar:compose\"][type=\"button\"]")
+
+    @FindBy(css = "button[data-testid=\"sidebar:compose\"][type=\"button\"]")
     WebElement newMailButton;
 
-    @FindBy ( css = "[id^=\"to-composer\"]")
+    @FindBy(css = "[id^=\"to-composer\"]")
     WebElement addresseeField;
 
-    @FindBy (css = "[id^=\"subject-composer\"]")
+    @FindBy(css = "[id^=\"subject-composer\"]")
     WebElement subjectField;
 
-    @FindBy (css = "iframe[data-testid=\"rooster-iframe\"]")
+    @FindBy(css = "iframe[data-testid=\"rooster-iframe\"]")
     WebElement messageIframe;
 
-    @FindBy (id = "rooster-editor")
+    @FindBy(id = "rooster-editor")
     WebElement messageField;
 
-    @FindBy (css = "a[data-testid=\"navigation-link:all-drafts\"]")
+    @FindBy(css = "a[data-testid=\"navigation-link:all-drafts\"]")
     WebElement draftPageLink;
 
-    @FindBy (css = "a[data-testid=\"navigation-link:all-sent\"]")
+    @FindBy(css = "a[data-testid=\"navigation-link:all-sent\"]")
     WebElement sendPageLink;
 
-    @FindBy (css = BY_FOR_EMAIL_LIST)
+    @FindBy(css = BY_FOR_EMAIL_LIST)
     List<WebElement> draftedMessages;
 
-    @FindBy ( css = "span.composer-addresses-fakefield-inner")
+    @FindBy(css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
 
 
-
-    public EmailMainPage (WebDriver driver){
+    public EmailMainPage(WebDriver driver) {
         super(driver);
     }
 
-    public boolean foundNewMailButton(){
+    public boolean foundNewMailButton() {
+        logger.debug("Checking visibility of 'New Mail' button");
         waitForElement(newMailButton);
-        return newMailButton.isDisplayed();
+        boolean displayed = newMailButton.isDisplayed();
+        logger.info("ACTION: 'New Mail' button displayed = {}", displayed);
+        return displayed;
     }
 
-    public EmailMainPage createNewDraft()
-    {
+    public EmailMainPage createNewDraft() {
+        logger.info("ACTION: Creating new draft");
         waitForElement(newMailButton);
         newMailButton.click();
         fillNewMailFields();
         return this;
     }
 
-    public EmailMainPage fillNewMailFields(){
+    public EmailMainPage fillNewMailFields() {
+        logger.info("ACTION: Filling new mail fields (to: {}, subject: {})", EMAIL, MAIL_SUBJECT);
+
         waitForElement(addresseeField);
         addresseeField.sendKeys(EMAIL);
+        logger.debug("Addressee field filled with: {}", EMAIL);
+
         waitForElement(subjectField);
         subjectField.sendKeys(MAIL_SUBJECT);
+        logger.debug("Subject field filled with: {}", MAIL_SUBJECT);
+
         switchToIframe();
         waitForElement(messageField);
         messageField.clear();
         messageField.sendKeys(MAIL_CONTENT);
+        logger.debug("Message body filled");
+
         return this;
     }
 
-    public EmailMainPage saveDraft(){
+    public EmailMainPage saveDraft() {
+        logger.info("ACTION: Saving draft");
         createNewDraft();
         closeMessage();
         return this;
     }
 
-
     public boolean checkForDraft() {
+        logger.info("ACTION: Checking for existing matching draft");
         int index = findDraftIndex();
         if (index != -1) {
+            logger.debug("Matching draft found at index: {}", index);
             closeComposer();
             return true;
         }
+        logger.debug("No matching draft found");
         return false;
     }
+
     public boolean checkForSent() {
+        logger.info("ACTION: Checking for sent message");
         int index = findSentIndex();
         if (index != -1) {
-
+            logger.debug("Matching sent message found at index: {}", index);
             return true;
         }
+        logger.debug("No matching sent message found");
         return false;
     }
 
     public EmailMainPage openDraft() {
+        logger.info("ACTION: Opening draft");
         int index = findDraftIndex();
         if (index == -1) {
+            logger.error("Matching draft not found - cannot open");
             throw new NoSuchElementException("Matching draft not found");
         }
+        logger.debug("Draft opened at index: {}", index);
         return this;
     }
 
-    public EmailMainPage sendMail(){
+    public EmailMainPage sendMail() {
+        logger.info("ACTION: Sending mail");
         clickSendButton();
         waitForSendConfirmationToClear();
         switchToDefaultContent();
+        logger.info("Mail sent successfully");
         return this;
     }
 
     private int findDraftIndex() {
+        logger.debug("Searching for matching draft among drafted messages");
         waitForElement(draftPageLink);
         draftPageLink.click();
         waitForMessageList();
 
         int listSize = draftedMessages.size();
+        logger.debug("Found {} drafted messages to check", listSize);
 
         for (int i = 0; i < listSize; i++) {
+            logger.debug("Checking draft at index: {}", i);
             clickDraftByIndex(i);
             if (checkForSearchedMessage()) {
+                logger.debug("Match found at index: {}", i);
                 return i;
             }
             switchToDefaultContent();
@@ -131,21 +161,26 @@ public class EmailMainPage extends AbstractPage{
             draftPageLink.click();
             waitForMessageList();
         }
+        logger.debug("No matching draft found after checking {} messages", listSize);
         return -1;
     }
 
     private int findSentIndex() {
+        logger.debug("Searching for matching sent message");
         waitForElement(sendPageLink);
         sendPageLink.click();
         waitForMessageList();
 
         int listSize = draftedMessages.size();
+        logger.debug("Found {} sent messages to check", listSize);
 
         for (int i = 0; i < listSize; i++) {
             if (checkSentHeader(i)) {
+                logger.debug("Match found at index: {}", i);
                 return i;
             }
         }
+        logger.debug("No matching sent message found after checking {} messages", listSize);
         return -1;
     }
 
@@ -156,7 +191,7 @@ public class EmailMainPage extends AbstractPage{
             try {
                 List<WebElement> list = d.findElements(By.cssSelector(BY_FOR_EMAIL_LIST));
                 if (index >= list.size()) {
-                    System.out.println("clickDraftByIndex: index " + index + " out of bounds, list size=" + list.size());
+                    logger.warn("clickDraftByIndex: index {} out of bounds, list size={}", index, list.size());
                     return false;
                 }
                 WebElement row = list.get(index);
@@ -171,18 +206,18 @@ public class EmailMainPage extends AbstractPage{
                                     By.cssSelector("[data-testid^=\"composer-\"]")));
                     composerAppeared = true;
                 } catch (TimeoutException e) {
-                    System.out.println("clickDraftByIndex: composer did not appear after click on index " + index);
+                    logger.debug("clickDraftByIndex: composer did not appear after click on index {}", index);
                 }
                 return composerAppeared;
 
             } catch (StaleElementReferenceException e) {
-                System.out.println("clickDraftByIndex: stale element, retrying...");
+                logger.debug("clickDraftByIndex: stale element, retrying...");
                 return false;
             }
         });
     }
 
-    private boolean checkForSearchedMessage(){
+    private boolean checkForSearchedMessage() {
         try {
             waitForComposerToFullyLoad();
             waitForElement(messageAddress);
@@ -191,8 +226,8 @@ public class EmailMainPage extends AbstractPage{
                 new WebDriverWait(driver, Duration.ofSeconds(10))
                         .until(ExpectedConditions.attributeContains(messageAddress, "title", EMAIL));
             } catch (TimeoutException e) {
-                System.out.println("Address never populated with expected email. Current title=["
-                        + messageAddress.getAttribute("title") + "]");
+                logger.debug("Address never populated with expected email. Current title=[{}]",
+                        messageAddress.getAttribute("title"));
                 switchToDefaultContent();
                 return false;
             }
@@ -200,7 +235,7 @@ public class EmailMainPage extends AbstractPage{
             waitForElement(subjectField);
             String subj = subjectField.getAttribute("value");
             if (!subj.equals(MAIL_SUBJECT)) {
-                System.out.println("Subject mismatch: [" + subj + "]");
+                logger.debug("Subject mismatch: [{}]", subj);
                 switchToDefaultContent();
                 return false;
             }
@@ -209,7 +244,7 @@ public class EmailMainPage extends AbstractPage{
             waitForElement(messageField);
             String body = messageField.getText();
             if (!body.equals(MAIL_CONTENT)) {
-                System.out.println("Body mismatch: [" + body + "]");
+                logger.debug("Body mismatch: [{}]", body);
                 switchToDefaultContent();
                 return false;
             }
@@ -217,7 +252,7 @@ public class EmailMainPage extends AbstractPage{
             return true;
 
         } catch (TimeoutException | NoSuchElementException e) {
-            System.out.println("Exception in checkForSearchedMessage: " + e.getMessage());
+            logger.debug("Exception in checkForSearchedMessage: {}", e.getMessage());
             switchToDefaultContent();
             return false;
         }
@@ -226,14 +261,17 @@ public class EmailMainPage extends AbstractPage{
     private boolean checkSentHeader(int index) {
         try {
             String senderTitle = getTitleFromRow(index, "[data-testid=\"message-column:sender-address\"]");
-            System.out.println("Row " + index + " sender=[" + senderTitle + "]");
-            if (!senderTitle.contains(EMAIL)) { return false; }
+            logger.debug("Row {} sender=[{}]", index, senderTitle);
+            if (!senderTitle.contains(EMAIL)) {
+                return false;
+            }
 
             String subjectTitle = getTitleFromRow(index, "[data-testid=\"message-column:subject\"]");
-            System.out.println("Row " + index + " subject=[" + subjectTitle + "]");
+            logger.debug("Row {} subject=[{}]", index, subjectTitle);
             return subjectTitle.trim().contains(MAIL_SUBJECT);
 
         } catch (TimeoutException | NoSuchElementException | IndexOutOfBoundsException e) {
+            logger.debug("Exception in checkSentHeader for index {}: {}", index, e.getMessage());
             return false;
         }
     }
@@ -252,7 +290,6 @@ public class EmailMainPage extends AbstractPage{
 
     private void waitForSendConfirmationToClear() {
         try {
-            // Wait for a send-confirmation toast/notification to appear, then disappear
             new WebDriverWait(driver, Duration.ofSeconds(5))
                     .until(ExpectedConditions.visibilityOfElementLocated(
                             By.cssSelector("[data-testid=\"notification:success\"]")));
@@ -261,12 +298,12 @@ public class EmailMainPage extends AbstractPage{
                     .until(ExpectedConditions.invisibilityOfElementLocated(
                             By.cssSelector("[data-testid=\"notification:success\"]")));
         } catch (TimeoutException e) {
-            // Toast might not appear/disappear as expected — don't fail the flow for this
-            System.out.println("No send-confirmation toast detected or it didn't disappear in time.");
+            logger.warn("No send-confirmation toast detected or it didn't disappear in time");
         }
     }
 
     private void waitForComposerToFullyLoad() {
+        logger.debug("Waiting for composer to fully load");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         wait.until(ExpectedConditions.presenceOfElementLocated(
@@ -287,13 +324,13 @@ public class EmailMainPage extends AbstractPage{
         closeComposer();
     }
 
-
-    private void switchToDefaultContent(){
+    private void switchToDefaultContent() {
+        logger.debug("Switching to default content");
         driver.switchTo().defaultContent();
     }
 
-
     private void switchToIframe() {
+        logger.debug("Switching to message iframe");
         waitForElement(messageIframe);
         driver.switchTo().frame(messageIframe);
     }
@@ -310,8 +347,8 @@ public class EmailMainPage extends AbstractPage{
                 ));
     }
 
-
-    private void  closeComposer() {
+    private void closeComposer() {
+        logger.debug("Closing composer");
         WebElement closeButton = getCloseButton();
         closeButton.click();
         new WebDriverWait(driver, Duration.ofSeconds(7))
@@ -328,6 +365,7 @@ public class EmailMainPage extends AbstractPage{
     }
 
     private void clickSendButton() {
+        logger.debug("Clicking send button");
         WebElement sendButton = new WebDriverWait(driver, Duration.ofSeconds(5))
                 .until(ExpectedConditions.visibilityOfElementLocated(
                         By.cssSelector(BY_FOR_SEND_BUTTON)));

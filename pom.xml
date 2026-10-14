@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.epam.training.mateusz_smola</groupId>
-  <artifactId>gmail-simple-test</artifactId>
-  <version>1.0-SNAPSHOT</version>
+    <groupId>com.epam.training.mateusz_smola</groupId>
+    <artifactId>gmail-simple-test</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
-  <name>gmail-simple-test</name>
-
+    <name>gmail-simple-test</name>
 
 
     <properties>
@@ -58,18 +57,29 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.23.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <scope>runtime</scope>
+            <version>2.25.4</version>
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
-        <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>3.5.6</version>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.6</version>
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>src/test/resources/${suite}</suiteXmlFile>
