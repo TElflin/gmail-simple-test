@@ -1,5 +1,7 @@
 package com.epam.training.mateusz_smola.driver;
 
+import com.epam.training.mateusz_smola.driver.factory.DriverFactory;
+import com.epam.training.mateusz_smola.driver.factory.DriverProvider;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -16,56 +18,52 @@ public class DriverManager {
 
     private static final Logger logger = LoggerFactory.getLogger(DriverManager.class);
 
-    private static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
+    private static final ThreadLocal<DriverManager> instanceHolder = new ThreadLocal<>();
 
-    public static WebDriver getDriver() {
-        logger.debug("Retrieving driver instance for current thread: {}", Thread.currentThread().getName());
-        return driver.get();
+    private WebDriver driver;
+
+    private DriverManager() {}
+
+    public static DriverManager getInstance() {
+        DriverManager instance = instanceHolder.get();
+
+        if (instance == null) {
+            instance = new DriverManager();
+            instanceHolder.set(instance);
+        }
+        return instance;
     }
 
-    public static void setDriver() {
 
-        if (driver.get() != null) {
-            logger.warn("Driver already exists for this thread. Quitting existing driver before creating a new one.");
+    public WebDriver getDriver() {
+        logger.debug("Retrieving driver instance for thread: {}", Thread.currentThread().getName());
+        return driver;
+    }
+
+
+    public void setDriver() {
+        if (driver != null) {
+            logger.warn("Driver already exists for this thread. Quitting existing driver first.");
             quitDriver();
         }
 
         String browser = System.getProperty("browser");
-        logger.debug("System property 'browser' resolved to: {}", browser);
         logger.info("ACTION: Initializing WebDriver for browser '{}'", browser);
 
-        switch (browser) {
+        DriverFactory factory = DriverProvider.getFactory(browser);
+        WebDriver rawDriver = factory.createDriver();
 
-            case "edge" -> {
-                EdgeOptions edgeOptions = new EdgeOptions();
-                driver.set(new EdgeDriver(edgeOptions));
-                logger.info("Edge driver created successfully on thread: {}", Thread.currentThread().getName());
-            }
+        driver = new WebDriverDecorator(rawDriver);
 
-            case "firefox" -> {
-                FirefoxOptions firefoxOptions = new FirefoxOptions();
-                driver.set(new FirefoxDriver(firefoxOptions));
-                logger.info("Firefox driver created successfully on thread: {}", Thread.currentThread().getName());
-            }
-
-            case "chrome" -> {
-                ChromeOptions chromeOptions = new ChromeOptions();
-                driver.set(new ChromeDriver(chromeOptions));
-                logger.info("Chrome driver created successfully on thread: {}", Thread.currentThread().getName());
-            }
-
-            case null, default -> {
-                logger.error("Invalid or missing browser property: '{}'. Expected -Dbrowser=chrome|firefox|edge", browser);
-                throw new IllegalArgumentException("No compatible browser specified : -Dbrowser=yourbrowser");
-            }
-        }
+        logger.info("{} driver created successfully on thread: {}", browser, Thread.currentThread().getName());
     }
 
-    public static void quitDriver() {
-        if (driver.get() != null) {
-            logger.info("ACTION: Quitting WebDriver and removing from ThreadLocal");
-            driver.get().quit();
-            driver.remove();
+    public void quitDriver() {
+        if (driver != null) {
+            logger.info("ACTION: Quitting WebDriver and clearing instance");
+            driver.quit();
+            driver = null;
+            instanceHolder.remove();
         } else {
             logger.debug("quitDriver() called but no active driver found for thread: {}", Thread.currentThread().getName());
         }

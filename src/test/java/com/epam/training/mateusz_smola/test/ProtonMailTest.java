@@ -21,7 +21,7 @@ public class ProtonMailTest {
 
     @BeforeMethod
     void setup() {
-        DriverManager.setDriver();
+        DriverManager.getInstance().setDriver();
 
     }
 
@@ -59,12 +59,12 @@ public class ProtonMailTest {
 
     @AfterMethod
     void teardown() {
-        DriverManager.quitDriver();
+        DriverManager.getInstance().quitDriver();
     }
 
     private EmailMainPage logging() {
         Email email = createEmail();
-        WebDriver driver = DriverManager.getDriver();
+        WebDriver driver = DriverManager.getInstance().getDriver();
         LoginPage loginPage = new LoginPage(driver);
         return loginPage.openPage(email).logIn(email.getUser());
     }

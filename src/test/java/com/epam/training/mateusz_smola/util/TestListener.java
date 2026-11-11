@@ -27,7 +27,7 @@ public class TestListener implements ITestListener {
         logger.error("TEST FAILED: {} - Reason: {}", testName,
                 result.getThrowable() != null ? result.getThrowable().getMessage() : "Unknown");
 
-        WebDriver driver = DriverManager.getDriver();
+        WebDriver driver = DriverManager.getInstance().getDriver();
         ScreenshotUtil.saveScreenshot(driver, testName);
     }
 
