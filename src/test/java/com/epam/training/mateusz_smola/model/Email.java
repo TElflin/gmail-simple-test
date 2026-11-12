@@ -3,35 +3,46 @@ package com.epam.training.mateusz_smola.model;
 import java.util.Objects;
 
 public class Email {
-    private User user;
-    private String pageUrl;
+    private String emailAddress;
+    private String subject;
+    private String content;
 
-    public Email(User user, String pageUrl) {
-        this.user = user;
-        this.pageUrl = pageUrl;
+    public Email(String emailAddress, String subject, String content) {
+        this.emailAddress = emailAddress;
+        this.subject = subject;
+        this.content = content;
     }
 
-    public User getUser() {
-        return user;
+    public String getEmailAddress() {
+        return emailAddress;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public String getSubject() {
+        return subject;
     }
 
-    public String getPageUrl() {
-        return pageUrl;
+    public String getContent() {
+        return content;
     }
 
-    public void setPageUrl(String pageUrl) {
-        this.pageUrl = pageUrl;
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
     public String toString() {
         return "Email{" +
-                "user=" + user +
-                ", pageUrl='" + pageUrl + '\'' +
+                "emailAddress='" + emailAddress + '\'' +
+                ", subject='" + subject + '\'' +
+                ", content='" + content + '\'' +
                 '}';
     }
 
@@ -39,11 +50,11 @@ public class Email {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Email email = (Email) o;
-        return Objects.equals(user, email.user) && Objects.equals(pageUrl, email.pageUrl);
+        return Objects.equals(emailAddress, email.emailAddress) && Objects.equals(subject, email.subject) && Objects.equals(content, email.content);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, pageUrl);
+        return Objects.hash(emailAddress, subject, content);
     }
 }

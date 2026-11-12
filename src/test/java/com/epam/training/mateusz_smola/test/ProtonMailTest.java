@@ -2,6 +2,7 @@ package com.epam.training.mateusz_smola.test;
 
 import com.epam.training.mateusz_smola.driver.DriverManager;
 import com.epam.training.mateusz_smola.model.Email;
+import com.epam.training.mateusz_smola.model.User;
 import com.epam.training.mateusz_smola.page.EmailMainPage;
 import com.epam.training.mateusz_smola.page.LoginPage;
 import com.epam.training.mateusz_smola.util.TestListener;
@@ -12,6 +13,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import static com.epam.training.mateusz_smola.service.EmailCreator.createEmail;
+import static com.epam.training.mateusz_smola.service.UserCreator.CreateUser;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -63,10 +65,10 @@ public class ProtonMailTest {
     }
 
     private EmailMainPage logging() {
-        Email email = createEmail();
+        User user = CreateUser();
         WebDriver driver = DriverManager.getInstance().getDriver();
         LoginPage loginPage = new LoginPage(driver);
-        return loginPage.openPage(email).logIn(email.getUser());
+        return loginPage.openPage().logIn(user);
     }
 
 }

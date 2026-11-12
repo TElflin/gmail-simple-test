@@ -1,5 +1,7 @@
 package com.epam.training.mateusz_smola.page;
 
+import com.epam.training.mateusz_smola.model.Email;
+import com.epam.training.mateusz_smola.service.EmailCreator;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -10,16 +12,14 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.List;
 
+import static com.epam.training.mateusz_smola.service.EmailCreator.createEmail;
+
 public class EmailMainPage extends AbstractPage {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailMainPage.class);
 
     public static final String BY_FOR_EMAIL_LIST = "div[class=\"item-container-wrapper relative\"]";
     public static final String BY_FOR_SEND_BUTTON = "[data-testid=\"composer:send-button\"]";
-    public static final String EMAIL = "you.are@beautiful.pl";
-    public static final String MAIL_SUBJECT = "Keep smiling";
-    public static final String MAIL_CONTENT = "Keep going \n" +
-            "Keep being cool";
 
     @FindBy(css = "button[data-testid=\"sidebar:compose\"][type=\"button\"]")
     WebElement newMailButton;
@@ -48,6 +48,7 @@ public class EmailMainPage extends AbstractPage {
     @FindBy(css = "span.composer-addresses-fakefield-inner")
     WebElement messageAddress;
 
+    Email email = createEmail();
 
     public EmailMainPage(WebDriver driver) {
         super(driver);
@@ -70,20 +71,20 @@ public class EmailMainPage extends AbstractPage {
     }
 
     public EmailMainPage fillNewMailFields() {
-        logger.info("ACTION: Filling new mail fields (to: {}, subject: {})", EMAIL, MAIL_SUBJECT);
+        logger.info("ACTION: Filling new mail fields (to: {}, subject: {})", email.getEmailAddress(), email.getSubject());
 
         waitForElement(addresseeField);
-        addresseeField.sendKeys(EMAIL);
-        logger.debug("Addressee field filled with: {}", EMAIL);
+        addresseeField.sendKeys(email.getEmailAddress());
+        logger.debug("Addressee field filled with: {}", email.getEmailAddress());
 
         waitForElement(subjectField);
-        subjectField.sendKeys(MAIL_SUBJECT);
-        logger.debug("Subject field filled with: {}", MAIL_SUBJECT);
+        subjectField.sendKeys(email.getSubject());
+        logger.debug("Subject field filled with: {}", email.getSubject());
 
         switchToIframe();
         waitForElement(messageField);
         messageField.clear();
-        messageField.sendKeys(MAIL_CONTENT);
+        messageField.sendKeys(email.getContent());
         logger.debug("Message body filled");
 
         return this;
@@ -224,7 +225,7 @@ public class EmailMainPage extends AbstractPage {
 
             try {
                 new WebDriverWait(driver, Duration.ofSeconds(10))
-                        .until(ExpectedConditions.attributeContains(messageAddress, "title", EMAIL));
+                        .until(ExpectedConditions.attributeContains(messageAddress, "title", email.getEmailAddress()));
             } catch (TimeoutException e) {
                 logger.debug("Address never populated with expected email. Current title=[{}]",
                         messageAddress.getAttribute("title"));
@@ -234,7 +235,7 @@ public class EmailMainPage extends AbstractPage {
 
             waitForElement(subjectField);
             String subj = subjectField.getAttribute("value");
-            if (!subj.equals(MAIL_SUBJECT)) {
+            if (!subj.equals(email.getSubject())) {
                 logger.debug("Subject mismatch: [{}]", subj);
                 switchToDefaultContent();
                 return false;
@@ -243,7 +244,7 @@ public class EmailMainPage extends AbstractPage {
             switchToIframe();
             waitForElement(messageField);
             String body = messageField.getText();
-            if (!body.equals(MAIL_CONTENT)) {
+            if (!body.equals(email.getContent())) {
                 logger.debug("Body mismatch: [{}]", body);
                 switchToDefaultContent();
                 return false;
@@ -262,13 +263,13 @@ public class EmailMainPage extends AbstractPage {
         try {
             String senderTitle = getTitleFromRow(index, "[data-testid=\"message-column:sender-address\"]");
             logger.debug("Row {} sender=[{}]", index, senderTitle);
-            if (!senderTitle.contains(EMAIL)) {
+            if (!senderTitle.contains(email.getEmailAddress())) {
                 return false;
             }
 
             String subjectTitle = getTitleFromRow(index, "[data-testid=\"message-column:subject\"]");
             logger.debug("Row {} subject=[{}]", index, subjectTitle);
-            return subjectTitle.trim().contains(MAIL_SUBJECT);
+            return subjectTitle.trim().contains(email.getSubject());
 
         } catch (TimeoutException | NoSuchElementException | IndexOutOfBoundsException e) {
             logger.debug("Exception in checkSentHeader for index {}: {}", index, e.getMessage());

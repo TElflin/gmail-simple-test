@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 public class LoginPage extends AbstractPage {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
+    private static final String LOGIN_PAGE_URL = "https://account.proton.me/pl/mail";
 
     @FindBy(css = "#username")
     private WebElement usernameField;
@@ -25,9 +26,9 @@ public class LoginPage extends AbstractPage {
         super(driver);
     }
 
-    public LoginPage openPage(Email email) {
-        logger.info("ACTION: Opening login page for email flow (url: {})", email.getPageUrl());
-        openPage(email.getPageUrl());
+    public LoginPage openPage() {
+        logger.info("ACTION: Opening login page for email flow (url: {})", LOGIN_PAGE_URL);
+        openPage(LOGIN_PAGE_URL);
         return this;
     }
 
