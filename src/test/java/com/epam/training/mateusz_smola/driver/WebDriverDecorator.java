@@ -92,7 +92,11 @@ public class WebDriverDecorator implements WebDriver, TakesScreenshot {
 
     @Override
     public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException {
-        return ((TakesScreenshot) decoratedDriver).getScreenshotAs(target);
+        if (decoratedDriver instanceof TakesScreenshot ts) {
+            return ts.getScreenshotAs(target);
+        }
+        throw new UnsupportedOperationException(
+                "Underlying driver does not support screenshots");
     }
 
 

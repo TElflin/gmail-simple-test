@@ -35,28 +35,25 @@ public class ProtonMailTest {
     }
 
     @Test
-//(dependsOnMethods = "successfulLogin")
     void creatingAndSavingDraft() {
         EmailMainPage mainPage = logging();
-        assertTrue(mainPage.saveDraft().checkForDraft(), "Draft wasn't saved");
-
+        Email email = createEmail();
+        assertTrue(mainPage.saveDraft(email).checkForDraft(email), "Draft wasn't saved");
     }
 
     @Test
-//(dependsOnMethods = "creatingAndSavingDraft")
     void sendingMailDeletingFromDrafts() {
         EmailMainPage mainPage = logging();
-
-        mainPage.openDraft().sendMail();
-        assertFalse(mainPage.checkForDraft(), "Draft didn't disappear after sending");
+        Email email = createEmail();
+        mainPage.sendDraft(email);
+        assertFalse(mainPage.checkForDraft(email), "Draft didn't disappear after sending");
     }
 
     @Test
-//(dependsOnMethods = "sendingMailDeletingFromDrafts")
     void mailIsInSendFolder() {
         EmailMainPage mainPage = logging();
-
-        assertTrue(mainPage.checkForSent(), "No email in send folder");
+        Email email = createEmail();
+        assertTrue(mainPage.checkForSent(email), "No email in send folder");
     }
 
     @AfterMethod
